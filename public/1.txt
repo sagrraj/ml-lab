@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import *
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+import pandas as pd
+
+# heart1.csv: 1025 rows, 13 features + target (0/1 disease)
+df = pd.read_csv(r"./heart1.csv")
+print("Shape:", df.shape, "| Target:", df['target'].value_counts().to_dict())
+X = df.drop("target", axis=1).values
+y = df["target"].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LogisticRegression(max_iter=5000).fit(X_train, y_train)
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
+
+cm = confusion_matrix(y_test, y_pred)
+TN, FP, FN, TP = cm.ravel()
+print("Confusion Matrix:\n", cm)
+print("TP:", TP, "TN:", TN, "FP:", FP, "FN:", FN)
+
+accuracy = (TP+TN)/(TP+TN+FP+FN)
+precision = TP/(TP+FP)
+recall = TP/(TP+FN)
+F1 = 2*precision*recall/(precision+recall)
+specificity = TN/(TN+FP)
+npv = TN/(TN+FN)
+mcc = ((TP*TN)-(FP*FN))/np.sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
+
+print("\nCustom vs sklearn:")
+print("Accuracy:", round(accuracy,4), "|", round(accuracy_score(y_test,y_pred),4))
+print("Precision:", round(precision,4), "|", round(precision_score(y_test,y_pred),4))
+print("Recall:", round(recall,4), "|", round(recall_score(y_test,y_pred),4))
+print("F1:", round(F1,4), "|", round(f1_score(y_test,y_pred),4))
+print("MCC:", round(mcc,4), "|", round(matthews_corrcoef(y_test,y_pred),4))
+print("Specificity:", round(specificity,4))
+print("NPV:", round(npv,4))
+
+fpr, tpr, _ = roc_curve(y_test, y_prob)
+auc = roc_auc_score(y_test, y_prob)
+
+plt.plot(fpr, tpr, label=f"AUC = {auc:.3f}")
+plt.plot([0,1],[0,1], 'k--')
+
+plt.xlabel("FPR")
+plt.ylabel("TPR")
+plt.legend()
+plt.show()
+
+rand = np.random.RandomState(42).rand(len(y_test))
+rfpr, rtpr, _ = roc_curve(y_test, rand)
+random_auc = roc_auc_score(y_test, rand)
+
+print("Test AUC:", round(auc, 4))
+print("Random AUC:", round(random_auc, 4))
