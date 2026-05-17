@@ -1,0 +1,18 @@
+import pandas as pd
+
+def find_s(training_data):
+    hypothesis = ['Ø'] * (len(training_data[0]) - 1)
+    for row in training_data:
+        if row[-1] == "yes":
+            for i in range(len(hypothesis)):
+                if hypothesis[i] == 'Ø':
+                    hypothesis[i] = row[i]
+                elif hypothesis[i] != row[i]:
+                    hypothesis[i] = '?'
+    return hypothesis
+
+df = pd.read_csv(r"d:\ML LAB code\DATASET-2026\datasets\Play_Tennis.csv")
+
+data = df.values.tolist()
+
+print("Final Hypothesis:", find_s(data))

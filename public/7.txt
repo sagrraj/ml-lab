@@ -1,0 +1,19 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.cluster import KMeans
+
+df = pd.read_csv(r"./iris1.csv")
+df.columns = [c.strip() for c in df.columns]
+print("Shape:", df.shape, "| Classes:", df['Class'].unique())
+X = df[['Sepal_Length', 'Sepal_Width', 'Petal_Length', 'Petal_Width']].values  # all 4 features
+
+for k in [2, 3, 4]:
+    km = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = km.fit_predict(X)
+    plt.figure(figsize=(5,4))
+    plt.scatter(X[:,0], X[:,1], c=labels)
+    plt.scatter(km.cluster_centers_[:,0], km.cluster_centers_[:,1], c='red', marker='X', s=120)
+    plt.xlabel('Sepal_Length'); plt.ylabel('Sepal_Width')
+    plt.title(f'K={k}, Inertia={km.inertia_:.2f} (iris1.csv)')
+    print(f'K={k} Inertia:', round(km.inertia_, 2))
+    plt.show()

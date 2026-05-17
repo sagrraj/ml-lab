@@ -1,0 +1,78 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.cluster import AgglomerativeClustering
+from scipy.cluster.hierarchy import linkage, dendrogram
+
+# Load dataset
+df = pd.read_csv(r"./iris1.csv")
+
+# Remove extra spaces from column names
+df.columns = [c.strip() for c in df.columns]
+
+# Features
+X = df[['Sepal_Length',
+        'Sepal_Width',
+        'Petal_Length',
+        'Petal_Width']].values
+
+# ---------- AGNES ----------
+
+agnes = AgglomerativeClustering(n_clusters=3)
+
+labels_agnes = agnes.fit_predict(X)
+
+# Dendrogram
+Z = linkage(X, method='ward')
+
+plt.figure(figsize=(8,4))
+
+dendrogram(Z)
+
+plt.title("AGNES Dendrogram")
+
+plt.xlabel("Samples")
+
+plt.ylabel("Distance")
+
+plt.show()
+
+# ---------- Simple DIANA ----------
+
+def diana(X):
+
+    labels = np.zeros(len(X))
+
+    center = np.mean(X, axis=0)
+
+    dist = np.linalg.norm(X - center, axis=1)
+
+    labels[dist > np.median(dist)] = 1
+
+    return labels
+
+labels_diana = diana(X)
+
+# ---------- Cluster Plots ----------
+
+fig, ax = plt.subplots(1, 2, figsize=(10,4))
+
+ax[0].scatter(X[:,0], X[:,1], c=labels_agnes, cmap='tab10')
+
+ax[0].set_title("AGNES")
+
+ax[0].set_xlabel("Sepal Length")
+
+ax[0].set_ylabel("Sepal Width")
+
+ax[1].scatter(X[:,0], X[:,1], c=labels_diana, cmap='tab10')
+
+ax[1].set_title("DIANA")
+
+ax[1].set_xlabel("Sepal Length")
+
+ax[1].set_ylabel("Sepal Width")
+
+plt.tight_layout()
+
+plt.show()
