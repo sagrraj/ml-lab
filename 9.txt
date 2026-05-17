@@ -1,0 +1,21 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
+
+# ColourXY.csv: 12529 rows | x, y, color (0/1/2 clusters)
+df = pd.read_csv(r"d:\ML LAB code\DATASET-2026\datasets\ColourXY.csv")
+print("Full shape:", df.shape, "colors:", sorted(df['color'].unique()))
+df = df.sample(800, random_state=42)
+X = StandardScaler().fit_transform(df[['x','y']].values)
+
+configs = [(0.3, 5), (0.3, 15), (0.8, 5), (0.15, 5)]
+fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+for ax, (eps, ms) in zip(axes.ravel(), configs):
+    labels = DBSCAN(eps=eps, min_samples=ms).fit_predict(X)
+    ax.scatter(X[:,0], X[:,1], c=labels, cmap='tab10', s=15)
+    n_clust = len(set(labels)) - (1 if -1 in labels else 0)
+    n_noise = np.sum(labels == -1)
+    ax.set_title(f'eps={eps}, min_samples={ms}\nClusters={n_clust}, Noise={n_noise}')
+plt.tight_layout(); plt.show()

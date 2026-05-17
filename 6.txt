@@ -1,0 +1,23 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.preprocessing import StandardScaler
+
+# haberman.csv: 306 rows | Age, Year, nodes, Survived (1=survived 5yr, 2=died)
+df = pd.read_csv(r"d:\ML LAB code\DATASET-2026\datasets\haberman.csv")
+print("Shape:", df.shape, list(df.columns))
+print("Survived:\n", df['Survived'].value_counts())
+X = df[['Age', 'Year', 'Number of +ve axilliary nodes']]
+y = df['Survived'].map({1: 0, 2: 1})  # 1=survived, 2=died -> binary
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s = scaler.transform(X_test)
+
+model = GaussianNB().fit(X_train_s, y_train)
+print("Accuracy:", round(model.score(X_test_s, y_test) * 100, 2), "%")
+
+new_data = scaler.transform([[55, 60, 3]])
+pred = model.predict(new_data)[0]
+print("New sample prediction:", "Survived" if pred == 0 else "Not Survived")

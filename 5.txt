@@ -1,0 +1,80 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from collections import Counter
+
+# Load dataset
+df = pd.read_csv(r"d:\ML LAB code\DATASET-2026\datasets\diabetes3.csv")
+
+# Replace 0 with mean
+for c in ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']:
+    df[c] = df[c].replace(0, np.nan)
+
+df.fillna(df.mean(), inplace=True)
+
+# Features and target
+X = df.drop('Outcome', axis=1).values
+y = df['Outcome'].values
+
+# Normalization
+scaler = StandardScaler()
+
+X = scaler.fit_transform(X)
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Custom KNN
+class KNN:
+
+    def __init__(self, k=3):
+        self.k = k
+
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
+
+    def predict(self, X_test):
+
+        predictions = []
+
+        for x in X_test:
+
+            # Euclidean distance
+            distances = np.sqrt(np.sum((self.X_train - x) ** 2, axis=1))
+
+            # K nearest neighbors
+            k_indexes = np.argsort(distances)[:self.k]
+
+            k_labels = self.y_train[k_indexes]
+
+            prediction = Counter(k_labels).most_common(1)[0][0]
+
+            predictions.append(prediction)
+
+        return np.array(predictions)
+
+
+# Try different K values
+for k in [3, 5, 7]:
+
+    model = KNN(k=k)
+
+    model.fit(X_train, y_train)
+
+    predictions = model.predict(X_test)
+
+    accuracy = np.mean(predictions == y_test)
+
+    print(f"K = {k}, Accuracy = {accuracy:.4f}")
+
+
+# New sample
+new = scaler.transform([[6,148,72,35,155,33.6,0.627,50]])
+
+pred = model.predict(new)
+
+print("Prediction:", "Diabetic" if pred[0] == 1 else "Not Diabetic")

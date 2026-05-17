@@ -1,0 +1,70 @@
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import *
+
+# ---------- Linear Regression ----------
+
+lin_df = pd.read_csv(r"d:\ML LAB code\DATASET-2026\datasets\ex1data1.csv")
+
+X = lin_df[['Population']]
+y = lin_df['Profit']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=1
+)
+
+lin_model = LinearRegression()
+
+lin_model.fit(X_train, y_train)
+
+y_pred = lin_model.predict(X_test)
+
+print("LINEAR REGRESSION")
+print("MSE:", mean_squared_error(y_test, y_pred))
+print("RMSE:", np.sqrt(mean_squared_error(y_test, y_pred)))
+
+# New test data
+new_lin = [[7.5]]
+
+print("New Prediction:", lin_model.predict(new_lin))
+
+
+# ---------- Logistic Regression ----------
+
+log_df = pd.read_csv(r"d:\ML LAB code\DATASET-2026\datasets\heart1.csv")
+
+X = log_df.drop('target', axis=1)
+y = log_df['target']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=1
+)
+
+log_model = LogisticRegression(max_iter=5000)
+
+log_model.fit(X_train, y_train)
+
+y_pred = log_model.predict(X_test)
+
+print("\nLOGISTIC REGRESSION")
+
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+
+print("Precision:", precision_score(y_test, y_pred))
+
+print("Recall:", recall_score(y_test, y_pred))
+
+mse = mean_squared_error(y_test, y_pred)
+
+print("MSE:", mse)
+
+print("RMSE:", np.sqrt(mse))
+
+# New test data
+new_log = X_test.iloc[:1]
+
+print("New Prediction:", log_model.predict(new_log))
